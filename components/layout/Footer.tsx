@@ -24,15 +24,15 @@ export default function Footer() {
             {/* Social */}
 
             <div className="mt-8 flex gap-4">
-              <Link href="https://facebook.com/..." target="_blank" className="rounded-full border border-slate-700 p-3 transition hover:bg-[#0F4C81]">
+              <Link href="https://www.facebook.com/CVDAHABOREPILE/" target="_blank" className="rounded-full border border-slate-700 p-3 transition hover:bg-[#0F4C81]">
                 <FaFacebookF size={18} />
               </Link>
 
-              <Link href="https://instagram.com/..." target="_blank" className="rounded-full border border-slate-700 p-3 transition hover:bg-[#0F4C81]">
+              <Link href="https://www.instagram.com/cvdahaborepile/" target="_blank" className="rounded-full border border-slate-700 p-3 transition hover:bg-[#0F4C81]">
                 <FaInstagram size={18} />
               </Link>
 
-              <Link href="https://linkedin.com/company/..." target="_blank" className="rounded-full border border-slate-700 p-3 transition hover:bg-[#0F4C81]">
+              <Link href="https://www.tiktok.com/@cv.daha.borepile" target="_blank" className="rounded-full border border-slate-700 p-3 transition hover:bg-[#0F4C81]">
                 <FaTiktok size={18} />
               </Link>
             </div>
