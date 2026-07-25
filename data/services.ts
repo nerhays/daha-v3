@@ -17,10 +17,10 @@ export const services = [
 
   {
     id: 3,
-    title: "Bore Pile Manual",
-    slug: "bore-pile-manual",
+    title: "Bore Pile Gawangan.",
+    slug: "bore-pile-gawangan",
     image: "/images/services/bore-pile-manual.jpg",
-    description: "Layanan bore pile manual untuk proyek konstruksi dengan kondisi lahan sempit, akses terbatas, serta kebutuhan pondasi yang memerlukan metode pengeboran manual.",
+    description: "Bore Pile Gawangan (atau sering disebut mesin odong-odong kaki 3/kaki 4) adalah metode pembuatan pondasi dalam menggunakan mesin bor diesel portable yang dirakit menggunakan rangka pipa besi di lokasi proyek. ",
   },
 
   {

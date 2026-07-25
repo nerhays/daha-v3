@@ -11,7 +11,7 @@ type Props = {
 
 export default function ServiceCard({ title, description, image, slug }: Props) {
   return (
-    <Link href={/*`/layanan/${slug}`*/ "/under-construction"} className="group overflow-hidden rounded-3xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
+    <Link href={`/layanan/${slug}` /*"/under-construction"*/} className="group overflow-hidden rounded-3xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
       <div className="relative h-64 overflow-hidden">
         <Image src={image} alt={title} fill className="object-cover transition duration-700 group-hover:scale-110" />
 
