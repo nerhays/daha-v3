@@ -13,7 +13,7 @@ type Props = {
 
 export default function ProjectCard({ title, image, slug, location, category, date }: Props) {
   return (
-    <Link href={/*`/artikel/${slug}`} */ "/under-construction"} className="group overflow-hidden rounded-3xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
+    <Link href={`/artikel/${slug}` /*"/under-construction" */} className="group overflow-hidden rounded-3xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
       <div className="relative h-72 overflow-hidden">
         <Image src={image} alt={title} fill className="object-cover transition duration-700 group-hover:scale-110" />
       </div>

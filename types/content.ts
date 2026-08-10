@@ -30,8 +30,12 @@ export interface ContentSection {
   heading?: string;
   paragraphs?: string[];
   list?: string[];
+  table?: ContentTable;
 }
-
+export interface ContentTable {
+  headers: string[];
+  rows: string[][];
+}
 export interface ContentData {
   badge: string;
   title: string;

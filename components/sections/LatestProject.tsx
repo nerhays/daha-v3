@@ -1,10 +1,10 @@
 import Link from "next/link";
 import ProjectCard from "../common/ProjectCard";
-import { projects } from "@/data/projects";
+import { getFeaturedProjects } from "@/lib/article";
 import FadeUp from "../ui/FadeUp";
 
 export default function LatestProject() {
-  const latestProjects = projects.slice(0, 3);
+  const latestProjects = getFeaturedProjects(3);
 
   return (
     <FadeUp>
@@ -23,12 +23,12 @@ export default function LatestProject() {
 
           <div className="mt-16 grid gap-8 lg:grid-cols-3">
             {latestProjects.map((item) => (
-              <ProjectCard key={item.id} title={item.title} image={item.image} slug={item.slug} location={item.location} category={item.category} date={item.date} />
+              <ProjectCard key={item.slug} title={item.title} image={item.cover.src} slug={item.slug} location={item.metadata.category} category={item.badge} date={item.metadata.publishedAt ?? ""} />
             ))}
           </div>
 
           <div className="mt-14 text-center">
-            <Link href="/under-construction" className="inline-flex rounded-xl bg-[#0F4C81] px-7 py-4 font-semibold text-white transition hover:bg-[#0A3760]">
+            <Link href="/artikel" className="inline-flex rounded-xl bg-[#0F4C81] px-7 py-4 font-semibold text-white transition hover:bg-[#0A3760]">
               Lihat Semua Artikel
             </Link>
           </div>

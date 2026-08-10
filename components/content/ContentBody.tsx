@@ -1,5 +1,5 @@
 import { ContentSection } from "@/types/content";
-
+import ContentTable from "./ContentTable";
 interface ContentBodyProps {
   sections: ContentSection[];
 }
@@ -27,6 +27,7 @@ export default function ContentBody({ sections }: ContentBodyProps) {
                 ))}
               </ul>
             )}
+            {section.table && <ContentTable table={section.table} />}
           </div>
         ))}
       </div>
