@@ -19,7 +19,7 @@ interface PageProps {
 export default async function ServiceDetailPage({ params }: PageProps) {
   const { slug } = await params;
 
-  const data = getServiceContent(slug);
+  const data = await getServiceContent(slug);
 
   if (!data) {
     notFound();
@@ -37,7 +37,7 @@ export default async function ServiceDetailPage({ params }: PageProps) {
 
       {data.faq && data.faq.length > 0 && <ContentFAQ items={data.faq} />}
 
-      <ContentCTA whatsappUrl="https://wa.me/6281335420048" />
+      <ContentCTA whatsappUrl="https://wa.me/6281234354300" />
     </>
   );
 }

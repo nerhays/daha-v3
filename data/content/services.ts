@@ -13,7 +13,7 @@ export const serviceContents: Record<string, ContentData> = {
     },
 
     cover: {
-      src: "/images/services/bore-pile.jpg",
+      src: "https://facyrvptwrjxzhocxwyl.supabase.co/storage/v1/object/public/services-images/bore-pile.jpg",
       alt: "Jasa Bore Pile DAHA",
     },
 
@@ -81,7 +81,7 @@ export const serviceContents: Record<string, ContentData> = {
     },
 
     cover: {
-      src: "/images/services/strauss-pile.jpg",
+      src: "https://facyrvptwrjxzhocxwyl.supabase.co/storage/v1/object/public/services-images/strauss-pile.jpg",
       alt: "Jasa Strauss Pile DAHA",
     },
 
@@ -142,7 +142,7 @@ export const serviceContents: Record<string, ContentData> = {
     },
 
     cover: {
-      src: "/images/services/bore-pile-manual.jpg",
+      src: "https://facyrvptwrjxzhocxwyl.supabase.co/storage/v1/object/public/services-images/bore-pile-manual.jpg",
       alt: "Jasa Bore Pile Gawangan",
     },
 
@@ -205,7 +205,7 @@ export const serviceContents: Record<string, ContentData> = {
     },
 
     cover: {
-      src: "/images/services/pondasi.jpg",
+      src: "https://facyrvptwrjxzhocxwyl.supabase.co/storage/v1/object/public/services-images/pondasi.jpg",
       alt: "Pondasi Lainnya",
     },
 
@@ -259,7 +259,7 @@ export const serviceContents: Record<string, ContentData> = {
     },
 
     cover: {
-      src: "/images/services/sewa-alat-proyek.png",
+      src: "https://facyrvptwrjxzhocxwyl.supabase.co/storage/v1/object/public/services-images/sewa-alat-proyek.png",
       alt: "Sewa Alat Proyek",
     },
 
@@ -325,7 +325,7 @@ export const serviceContents: Record<string, ContentData> = {
     },
 
     cover: {
-      src: "/images/services/sewa-kendaraan-proyek.png",
+      src: "https://facyrvptwrjxzhocxwyl.supabase.co/storage/v1/object/public/services-images/sewa-kendaraan-proyek.png",
       alt: "Sewa Kendaraan Proyek",
     },
 

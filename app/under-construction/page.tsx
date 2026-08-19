@@ -24,7 +24,7 @@ export default function UnderConstructionPage() {
         </p>
 
         <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
-          <a href="https://wa.me/6281234567890" target="_blank" rel="noopener noreferrer" className="rounded-xl bg-[#0F4C81] px-7 py-4 font-semibold text-white transition hover:bg-blue-900">
+          <a href="https://wa.me/6281234354300" target="_blank" rel="noopener noreferrer" className="rounded-xl bg-[#0F4C81] px-7 py-4 font-semibold text-white transition hover:bg-blue-900">
             Hubungi Kami
           </a>
 
