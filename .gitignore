@@ -75,3 +75,11 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+# AI agent skills
+.agents/
+
+# Temporary / development test
+/app/test-supabase/
+
+# Migration scripts - local only
+/scripts/

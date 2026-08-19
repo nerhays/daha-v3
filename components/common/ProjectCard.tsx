@@ -6,11 +6,10 @@ type Props = {
   title: string;
   image: string;
   slug: string;
-  location: string;
   category: string;
-  date: string;
+  date?: string;
+  location?: string;
 };
-
 export default function ProjectCard({ title, image, slug, location, category, date }: Props) {
   return (
     <Link href={`/artikel/${slug}` /*"/under-construction" */} className="group overflow-hidden rounded-3xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
@@ -24,15 +23,19 @@ export default function ProjectCard({ title, image, slug, location, category, da
         <h3 className="mt-5 text-2xl font-bold leading-snug text-slate-900">{title}</h3>
 
         <div className="mt-6 space-y-2 text-sm text-slate-500">
-          <div className="flex items-center gap-2">
-            <CalendarDays size={16} />
-            {date}
-          </div>
+          {date && (
+            <div className="flex items-center gap-2">
+              <CalendarDays size={16} />
+              {date}
+            </div>
+          )}
 
-          <div className="flex items-center gap-2">
-            <MapPin size={16} />
-            {location}
-          </div>
+          {location && (
+            <div className="flex items-center gap-2">
+              <MapPin size={16} />
+              {location}
+            </div>
+          )}
         </div>
 
         <div className="mt-8 flex items-center gap-3 font-semibold text-[#0F4C81]">

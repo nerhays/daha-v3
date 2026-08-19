@@ -20,7 +20,7 @@ interface PageProps {
 export default async function ArticleDetailPage({ params }: PageProps) {
   const { slug } = await params;
 
-  const data = getArticleContent(slug);
+  const data = await getArticleContent(slug);
 
   if (!data) {
     notFound();

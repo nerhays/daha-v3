@@ -15,7 +15,7 @@ export const articleContents: Record<string, ContentData> = {
     },
 
     cover: {
-      src: "/images/article/1749523558_3.png",
+      src: "https://facyrvptwrjxzhocxwyl.supabase.co/storage/v1/object/public/article-images/1749523558_3.png",
       alt: "Pondasi Bore pile",
     },
 
@@ -83,7 +83,7 @@ export const articleContents: Record<string, ContentData> = {
     },
 
     cover: {
-      src: "/images/article/1749523506_5.png",
+      src: "https://facyrvptwrjxzhocxwyl.supabase.co/storage/v1/object/public/article-images/1749523506_5.png",
       alt: "Alat Berat Excavator",
     },
 
@@ -160,7 +160,7 @@ export const articleContents: Record<string, ContentData> = {
     },
 
     cover: {
-      src: "/images/article/1749523401_7.png",
+      src: "https://facyrvptwrjxzhocxwyl.supabase.co/storage/v1/object/public/article-images/1749523401_7.png",
       alt: "Trucking",
     },
 
@@ -229,7 +229,7 @@ export const articleContents: Record<string, ContentData> = {
     },
 
     cover: {
-      src: "/images/article/1749521265_51.png",
+      src: "https://facyrvptwrjxzhocxwyl.supabase.co/storage/v1/object/public/article-images/1749521265_51.png",
       alt: "Molen Cor",
     },
 
@@ -303,7 +303,7 @@ export const articleContents: Record<string, ContentData> = {
     },
 
     cover: {
-      src: "/images/article/1749520938_up 26.png",
+      src: "https://facyrvptwrjxzhocxwyl.supabase.co/storage/v1/object/public/article-images/1749520938_up%2026.png",
       alt: "SCAFFOLDING",
     },
 
@@ -389,7 +389,7 @@ export const articleContents: Record<string, ContentData> = {
     },
 
     cover: {
-      src: "/images/article/1749523631_4.png",
+      src: "https://facyrvptwrjxzhocxwyl.supabase.co/storage/v1/object/public/article-images/1749523631_4.png",
       alt: "Pondasi Bore Manual",
     },
 
@@ -480,7 +480,7 @@ export const articleContents: Record<string, ContentData> = {
     },
 
     cover: {
-      src: "/images/article/1749523716_6.png",
+      src: "https://facyrvptwrjxzhocxwyl.supabase.co/storage/v1/object/public/article-images/1749523716_6.png",
       alt: "Truck Self loader",
     },
 
@@ -558,7 +558,7 @@ export const articleContents: Record<string, ContentData> = {
     },
 
     cover: {
-      src: "/images/article/1753159649_SCAFFOLDING 5 JUNI.png",
+      src: "https://facyrvptwrjxzhocxwyl.supabase.co/storage/v1/object/public/article-images/1753159649_SCAFFOLDING%205%20JUNI.png",
       alt: "PROSES PENGURUKAN PROYEK PURBALINGGA CV DAHA BORE PILE",
     },
 
@@ -605,7 +605,7 @@ export const articleContents: Record<string, ContentData> = {
     },
 
     cover: {
-      src: "/images/article/1753160190_SCAFFOLDING 5 JUNI (1).png",
+      src: "https://facyrvptwrjxzhocxwyl.supabase.co/storage/v1/object/public/article-images/1753160190_SCAFFOLDING%205%20JUNI%20(1).png",
       alt: "PROYEK BORE PILE RSUD PANGANDARAN CV DAHA BORE PILE",
     },
 
@@ -652,7 +652,7 @@ export const articleContents: Record<string, ContentData> = {
     },
 
     cover: {
-      src: "/images/article/1753169447_SCAFFOLDING 5 JUNI (2).png",
+      src: "https://facyrvptwrjxzhocxwyl.supabase.co/storage/v1/object/public/article-images/1753160190_SCAFFOLDING%205%20JUNI%20(1).png",
       alt: "Proyek BDI kediri pembangunan Bandara kediri",
     },
 
@@ -701,7 +701,7 @@ export const articleContents: Record<string, ContentData> = {
     },
 
     cover: {
-      src: "/images/article/1753170488_SCAFFOLDING 5 JUNI (3).png",
+      src: "https://facyrvptwrjxzhocxwyl.supabase.co/storage/v1/object/public/article-images/1753170488_SCAFFOLDING%205%20JUNI%20(3).png(3).png",
       alt: "UNNES SEMARANG KEDATANGAN ALAT BERAT SR155 DARI CV DAHA BORE PILE",
     },
 
@@ -761,7 +761,7 @@ export const articleContents: Record<string, ContentData> = {
     },
 
     cover: {
-      src: "/images/article/1753171132_SCAFFOLDING 5 JUNI (4).png",
+      src: "https://facyrvptwrjxzhocxwyl.supabase.co/storage/v1/object/public/article-images/1753171132_SCAFFOLDING%205%20JUNI%20(4).png",
       alt: "SANY Global Service Action 2025 dan CV Daha Bore Pile Bersinergi di UNNES Semarang!",
     },
 
@@ -816,7 +816,7 @@ export const articleContents: Record<string, ContentData> = {
     },
 
     cover: {
-      src: "/images/article/1753668544_SCAFFOLDING 5 JUNI (5).png",
+      src: "https://facyrvptwrjxzhocxwyl.supabase.co/storage/v1/object/public/article-images/1753668544_SCAFFOLDING%205%20JUNI%20(5).png",
       alt: "Proses Pengecoran Lubang Bore Pile di Proyek Sukorejo Nganjuk oleh CV Daha Bore Pile",
     },
 
@@ -880,7 +880,7 @@ export const articleContents: Record<string, ContentData> = {
     },
 
     cover: {
-      src: "/images/article/1753669975_12.png",
+      src: "https://facyrvptwrjxzhocxwyl.supabase.co/storage/v1/object/public/article-images/1753669975_12.png",
       alt: "ALAT BERAT SANY SR155 DARI CV DAHA BORE PILE TELAH TIBA DI RS SARDJITO YOGYAKARTA",
     },
 
@@ -940,7 +940,7 @@ export const articleContents: Record<string, ContentData> = {
     },
 
     cover: {
-      src: "/images/article/1753670230_11.png",
+      src: "https://facyrvptwrjxzhocxwyl.supabase.co/storage/v1/object/public/article-images/1753670230_11.png",
       alt: "PROGES CV DAHA BORE PILE PROYEK RSUD PANGANDARAN",
     },
 

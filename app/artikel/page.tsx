@@ -3,8 +3,8 @@ import Image from "next/image";
 
 import { getAllArticles } from "@/lib/article";
 
-export default function ArticlesPage() {
-  const articles = getAllArticles();
+export default async function ArticlesPage() {
+  const articles = await getAllArticles();
 
   return (
     <main>
