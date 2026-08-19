@@ -28,9 +28,70 @@
 //     })
 //     .slice(0, limit);
 // }
+
 import { createClient } from "@/lib/supabase/server";
-import { ContentData, ContentTable } from "@/types/content";
-import { articleContents } from "@/data/content/articles";
+import { ContentData } from "@/types/content";
+
+type ArticleSectionRow = {
+  id: number;
+  article_id: number;
+  section_order: number;
+  heading: string | null;
+  paragraphs: string[] | null;
+  list: string[] | null;
+};
+
+type ArticleSectionTableRow = {
+  id: number;
+  section_id: number;
+  headers: string[];
+  rows: string[][];
+};
+
+type ArticleFaqRow = {
+  id: number;
+  article_id: number;
+  faq_order: number;
+  question: string;
+  answer: string;
+};
+
+type ArticleGalleryRow = {
+  id: number;
+  article_id: number;
+  image_order: number;
+  src: string;
+  alt: string;
+};
+
+type ArticleRelatedRow = {
+  id: number;
+  article_id: number;
+  related_order: number;
+  title: string;
+  slug: string;
+  cover: string;
+};
+
+type ArticleRow = {
+  id: number;
+  slug: string;
+  badge: string;
+  title: string;
+  excerpt: string;
+  category: string;
+  published_at: string | null;
+  updated_at: string | null;
+  reading_time: string | null;
+  cover_src: string;
+  cover_alt: string;
+};
+
+/**
+ * =========================================================
+ * GET ALL ARTICLES
+ * =========================================================
+ */
 
 export async function getAllArticles(): Promise<Array<ContentData & { slug: string }>> {
   const supabase = await createClient();
@@ -42,8 +103,9 @@ export async function getAllArticles(): Promise<Array<ContentData & { slug: stri
     return [];
   }
 
-  return data.map((article) => ({
+  return (data as ArticleRow[]).map((article) => ({
     slug: article.slug,
+
     badge: article.badge,
     title: article.title,
     excerpt: article.excerpt,
@@ -64,42 +126,43 @@ export async function getAllArticles(): Promise<Array<ContentData & { slug: stri
   }));
 }
 
+/**
+ * =========================================================
+ * GET ARTICLE DETAIL
+ * =========================================================
+ */
+
 export async function getArticleContent(slug: string): Promise<ContentData | undefined> {
   const supabase = await createClient();
-  type ArticleSectionTableRow = {
-    section_id: number;
-    headers: string[];
-    rows: string[][];
-  };
-  // =========================
-  // ARTICLE
-  // =========================
 
-  const { data: article, error: articleError } = await supabase.from("articles").select("*").eq("slug", slug).single();
-
-  console.log("SLUG YANG DICARI:", slug);
-  console.log("ARTICLE DARI SUPABASE:", article);
-  console.log("ARTICLE ERROR:", articleError);
+  const { data: article, error: articleError } = await supabase.from("articles").select("*").eq("slug", slug).maybeSingle();
 
   if (articleError || !article) {
     console.error("Article error:", articleError);
     return undefined;
   }
 
-  // =========================
-  // SECTIONS
-  // =========================
+  const articleRow = article as ArticleRow;
 
-  const { data: sections, error: sectionsError } = await supabase.from("article_sections").select("*").eq("article_id", article.id).order("section_order", { ascending: true });
+  const [sectionsResult, faqResult, galleryResult, relatedResult] = await Promise.all([
+    supabase.from("article_sections").select("*").eq("article_id", articleRow.id).order("section_order", { ascending: true }),
 
-  if (sectionsError) {
-    console.error("Sections error:", sectionsError);
+    supabase.from("article_faq").select("*").eq("article_id", articleRow.id).order("faq_order", { ascending: true }),
+
+    supabase.from("article_gallery").select("*").eq("article_id", articleRow.id).order("image_order", { ascending: true }),
+
+    supabase.from("article_related").select("*").eq("article_id", articleRow.id).order("related_order", { ascending: true }),
+  ]);
+
+  if (sectionsResult.error) {
+    console.error("Sections error:", sectionsResult.error);
     return undefined;
   }
 
-  // =========================
-  // TABLES
-  // =========================
+  const sections = (sectionsResult.data ?? []) as ArticleSectionRow[];
+  const faq = (faqResult.data ?? []) as ArticleFaqRow[];
+  const gallery = (galleryResult.data ?? []) as ArticleGalleryRow[];
+  const related = (relatedResult.data ?? []) as ArticleRelatedRow[];
 
   const sectionIds = sections.map((section) => section.id);
 
@@ -113,48 +176,24 @@ export async function getArticleContent(slug: string): Promise<ContentData | und
       return undefined;
     }
 
-    tables = data ?? [];
+    tables = (data ?? []) as ArticleSectionTableRow[];
   }
 
-  // =========================
-  // FAQ
-  // =========================
-
-  const { data: faq } = await supabase.from("article_faq").select("*").eq("article_id", article.id).order("faq_order", { ascending: true });
-
-  // =========================
-  // GALLERY
-  // =========================
-
-  const { data: gallery } = await supabase.from("article_gallery").select("*").eq("article_id", article.id).order("image_order", { ascending: true });
-
-  // =========================
-  // RELATED
-  // =========================
-
-  const { data: related } = await supabase.from("article_related").select("*").eq("article_id", article.id).order("related_order", { ascending: true });
-
-  // =========================
-  // CONVERT TO CONTENTDATA
-  // =========================
-
   return {
-    badge: article.badge,
-
-    title: article.title,
-
-    excerpt: article.excerpt,
+    badge: articleRow.badge,
+    title: articleRow.title,
+    excerpt: articleRow.excerpt,
 
     metadata: {
-      category: article.category,
-      publishedAt: article.published_at ?? undefined,
-      updatedAt: article.updated_at ?? undefined,
-      readingTime: article.reading_time ?? undefined,
+      category: articleRow.category,
+      publishedAt: articleRow.published_at ?? undefined,
+      updatedAt: articleRow.updated_at ?? undefined,
+      readingTime: articleRow.reading_time ?? undefined,
     },
 
     cover: {
-      src: article.cover_src,
-      alt: article.cover_alt,
+      src: articleRow.cover_src,
+      alt: articleRow.cover_alt,
     },
 
     sections: sections.map((section) => {
@@ -177,7 +216,7 @@ export async function getArticleContent(slug: string): Promise<ContentData | und
     }),
 
     gallery:
-      gallery && gallery.length > 0
+      gallery.length > 0
         ? gallery.map((item) => ({
             src: item.src,
             alt: item.alt,
@@ -185,7 +224,7 @@ export async function getArticleContent(slug: string): Promise<ContentData | und
         : undefined,
 
     faq:
-      faq && faq.length > 0
+      faq.length > 0
         ? faq.map((item) => ({
             question: item.question,
             answer: item.answer,
@@ -193,7 +232,7 @@ export async function getArticleContent(slug: string): Promise<ContentData | und
         : undefined,
 
     related:
-      related && related.length > 0
+      related.length > 0
         ? related.map((item) => ({
             title: item.title,
             slug: item.slug,
@@ -202,18 +241,44 @@ export async function getArticleContent(slug: string): Promise<ContentData | und
         : undefined,
   };
 }
+
+/**
+ * =========================================================
+ * FEATURED PROJECTS
+ * =========================================================
+ */
+
 export async function getFeaturedProjects(limit = 3) {
   const supabase = await createClient();
 
-  const { data, error } = await supabase.from("articles").select("*").eq("badge", "Proyek").order("published_at", { ascending: false }).limit(limit);
+  const { data, error } = await supabase
+    .from("articles")
+    .select(
+      `
+        slug,
+        badge,
+        title,
+        excerpt,
+        category,
+        published_at,
+        updated_at,
+        reading_time,
+        cover_src,
+        cover_alt
+      `,
+    )
+    .eq("badge", "Proyek")
+    .order("published_at", { ascending: false })
+    .limit(limit);
 
   if (error) {
     console.error("Gagal mengambil proyek unggulan:", error);
     return [];
   }
 
-  return data.map((article) => ({
+  return (data as ArticleRow[]).map((article) => ({
     slug: article.slug,
+
     badge: article.badge,
     title: article.title,
     excerpt: article.excerpt,

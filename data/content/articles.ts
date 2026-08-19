@@ -701,7 +701,7 @@ export const articleContents: Record<string, ContentData> = {
     },
 
     cover: {
-      src: "https://facyrvptwrjxzhocxwyl.supabase.co/storage/v1/object/public/article-images/1753170488_SCAFFOLDING%205%20JUNI%20(3).png(3).png",
+      src: "https://facyrvptwrjxzhocxwyl.supabase.co/storage/v1/object/public/article-images/1753170488_SCAFFOLDING%205%20JUNI%20(3).png",
       alt: "UNNES SEMARANG KEDATANGAN ALAT BERAT SR155 DARI CV DAHA BORE PILE",
     },
 

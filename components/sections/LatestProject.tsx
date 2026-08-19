@@ -48,7 +48,7 @@ export default async function LatestProject() {
 
   return (
     <FadeUp>
-      <section>
+      <section id="projects">
         <div className="mx-auto max-w-6xl px-6 py-20">
           <div className="flex flex-col items-center">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#0F4C81]">Artikel Proyek</p>
