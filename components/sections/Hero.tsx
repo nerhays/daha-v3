@@ -12,9 +12,10 @@ export default function Hero() {
 
       <div className="relative mx-auto flex h-full max-w-7xl items-center px-6">
         <div className="max-w-3xl">
-          <span className="rounded-full border border-white/40 px-5 py-2 text-white">Sejak 2006</span>
-
-          <p className="mt-8 text-sm font-semibold uppercase tracking-[0.3em] text-[#60A5FA]">DAHA BOREPILE</p>
+          <div className="flex items-center gap-3 text-sm font-medium text-[#60A5FA]">
+            <span className="h-px w-8 bg-[#60A5FA]" />
+            <span className="tracking-wide">Sejak 2006 · DAHA BOREPILE</span>
+          </div>
 
           <h1 className="mt-4 text-4xl font-bold leading-tight text-white md:text-5xl lg:text-6xl">
             Bangun Impian Anda
@@ -26,13 +27,14 @@ export default function Hero() {
             Daha Borepile menyediakan jasa bore pile, strauss pile, mini pile, dan pekerjaan pondasi profesional untuk gedung, rumah sakit, gudang, apartemen, hingga kawasan industri di Indonesia.
           </p>
 
-          <div className="mt-10 flex gap-5">
-            <ScrollLink target="contact" className="rounded-xl bg-[#2a86d6] px-6 py-3 font-semibold text-white transition hover:bg-blue-900">
+          <div className="mt-10 flex flex-wrap items-center gap-6">
+            <ScrollLink target="contact" className="rounded-md bg-white px-7 py-3.5 text-sm font-semibold text-blue-950 transition hover:bg-blue-50">
               Konsultasi Gratis
             </ScrollLink>
 
-            <ScrollLink target="projects" className="rounded-xl bg-transparent border border-white px-6 py-3 font-semibold text-white transition hover:bg-white hover:text-[#0F4C81]">
-              Artikel Proyek
+            <ScrollLink target="projects" className="group flex items-center gap-2 text-sm font-semibold text-white transition hover:text-[#60A5FA]">
+              Lihat Proyek Kami
+              <span className="transition-transform group-hover:translate-x-1">→</span>
             </ScrollLink>
           </div>
         </div>
