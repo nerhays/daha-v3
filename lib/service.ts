@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { ContentData } from "@/types/content";
-
+import { serviceContents } from "@/data/content/services";
 type ServiceRow = {
   id: number;
   slug: string;
@@ -30,6 +30,30 @@ type ServiceFaqRow = {
   question: string;
   answer: string;
 };
+export async function getLandingServices() {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("services")
+    .select(
+      `
+      id,
+      slug,
+      landing_title,
+      landing_description,
+      cover_src,
+      cover_alt
+    `,
+    )
+    .order("id", { ascending: true });
+
+  if (error) {
+    console.error("Gagal mengambil layanan:", error);
+    return [];
+  }
+
+  return data ?? [];
+}
 export async function getServiceContent(slug: string): Promise<ContentData | undefined> {
   const supabase = await createClient();
 

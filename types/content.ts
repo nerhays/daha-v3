@@ -38,6 +38,8 @@ export interface ContentTable {
 }
 export interface ContentData {
   badge: string;
+  landing_title?: string;
+  landing_description?: string;
   title: string;
   excerpt: string;
 

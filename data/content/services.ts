@@ -3,7 +3,8 @@ import { ContentData } from "@/types/content";
 export const serviceContents: Record<string, ContentData> = {
   "bore-pile": {
     badge: "Layanan",
-
+    landing_title: "Bore Pile",
+    landing_description: "Layanan jasa bore pile profesional untuk pondasi gedung bertingkat, rumah sakit, apartemen, gudang, pabrik, hingga kawasan industri dengan kualitas terbaik dan tenaga berpengalaman.",
     title: "Jasa Borepile Profesional & Terpercaya – Solusi Pondasi Bangunan Kokoh",
 
     excerpt: "Butuh jasa borepile berpengalaman untuk proyek bangunan Anda? Daha Borepile menyediakan layanan pengeboran pondasi bore pile presisi, cepat, dan handal. Hubungi kami sekarang!",
@@ -71,7 +72,8 @@ export const serviceContents: Record<string, ContentData> = {
 
   "strauss-pile": {
     badge: "Layanan",
-
+    landing_title: "Strauss Pile",
+    landing_description: "Jasa strauss pile sebagai solusi pondasi untuk rumah, ruko, gudang, dan bangunan di area padat atau lokasi dengan akses alat berat yang terbatas.",
     title: "Jasa Strauss Pile (Borepile Manual) – Solusi Pondasi Rumah & Ruko Hemat Biaya",
 
     excerpt: "Cari jasa strauss pile terjangkau & berkualitas? Daha Borepile melayani pembuatan pondasi strauss pile manual untuk rumah bertingkat, ruko, dan pagar.",
@@ -132,7 +134,8 @@ export const serviceContents: Record<string, ContentData> = {
 
   "bore-pile-gawangan": {
     badge: "Layanan",
-
+    landing_title: "Bore Pile Gawangan",
+    landing_description: "Bore Pile Gawangan (atau sering disebut mesin odong-odong kaki 3/kaki 4) adalah metode pembuatan pondasi dalam menggunakan mesin bor diesel portable yang dirakit menggunakan rangka pipa besi di lokasi proyek.",
     title: "Jasa Borepile Gawangan Profesional – Solusi Pondasi Presisi di Akses Terbatas",
 
     excerpt: "Butuh pengeboran pondasi di lahan sempit atau gang? Daha Borepile menyediakan jasa borepile gawangan (tripod) handal, presisi, efisien, dan hemat biaya mobilisasi.",
@@ -195,7 +198,8 @@ export const serviceContents: Record<string, ContentData> = {
 
   pondasi: {
     badge: "Layanan",
-
+    landing_title: "Pondasi Lainnya",
+    landing_description: "Menyediakan berbagai jenis pekerjaan pondasi seperti mini pile, pondasi dalam, dan solusi konstruksi lainnya yang disesuaikan dengan kebutuhan setiap proyek.",
     title: "Layanan Pondasi Spesialis – Dari Sheet Pile Hingga Deep Foundation",
 
     excerpt: "Solusi lengkap pengerjaan pondasi bangunan Anda. Daha Borepile melayani borepile, strauss pile, hingga pengerjaan pondasi kustom sesuai kebutuhan struktur.",
@@ -249,7 +253,8 @@ export const serviceContents: Record<string, ContentData> = {
 
   "sewa-alat-proyek": {
     badge: "Layanan",
-
+    landing_title: "Sewa Alat Proyek",
+    landing_description: "Layanan sewa alat proyek konstruksi dengan pilihan peralatan berkualitas untuk mendukung pekerjaan bore pile, pondasi, pembangunan gedung, dan infrastruktur.",
     title: "Sewa Scaffolding & Alat Proyek Konstruksi – Lengkap, Aman, & Harga Terjangkau",
 
     excerpt: "Penyedia layanan sewa scaffolding (steger), excavator, mesin bor, dan alat pendukung konstruksi terpercaya. Pilihan unit lengkap, standar keselamatan tinggi, dan harga fleksibel dari Daha Borepile.",
@@ -315,7 +320,8 @@ export const serviceContents: Record<string, ContentData> = {
 
   "sewa-kendaraan-proyek": {
     badge: "Layanan",
-
+    landing_title: "Sewa Kendaraan Proyek",
+    landing_description: "Layanan sewa kendaraan proyek untuk mendukung mobilisasi material, alat berat, dan operasional konstruksi agar pekerjaan berjalan lebih efisien dan tepat waktu.",
     title: "Sewa Kendaraan Proyek & Transportasi Alat Heavy Equipment – Aman & Tepat Waktu",
 
     excerpt: "Dapatkan layanan sewa kendaraan proyek terpercaya di Daha Borepile. Tersedia armada pengangkut material, alat berat, dan operasional proyek dengan driver ahli.",

@@ -1,9 +1,10 @@
 import ServiceCard from "../common/ServiceCard";
-import { services } from "@/data/services";
 import FadeUp from "../ui/FadeUp";
-import Link from "next/link";
+import { getLandingServices } from "@/lib/service";
 
-export default function Services() {
+export default async function Services() {
+  const services = await getLandingServices();
+
   return (
     <FadeUp>
       <section id="services" className="bg-slate-50 py-24">
@@ -20,7 +21,7 @@ export default function Services() {
 
           <div className="mt-16 grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
             {services.map((item) => (
-              <ServiceCard key={item.id} title={item.title} description={item.description} image={item.image} slug={item.slug} />
+              <ServiceCard key={item.id} title={item.landing_title} description={item.landing_description} image={item.cover_src} slug={item.slug} />
             ))}
           </div>
         </div>
