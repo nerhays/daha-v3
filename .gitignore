@@ -79,7 +79,7 @@ Thumbs.db
 .agents/
 
 # Temporary / development test
-/app/test-supabase/
+/app/(site)/test-supabase/
 
 # Migration scripts - local only
 /scripts/

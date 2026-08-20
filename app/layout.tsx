@@ -20,13 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
-      <body className={manrope.className}>
-        <Navbar />
-
-        {children}
-
-        <Footer />
-      </body>
+      <body className={manrope.className}>{children}</body>
     </html>
   );
 }

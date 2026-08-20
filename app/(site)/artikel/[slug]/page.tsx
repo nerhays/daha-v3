@@ -6,6 +6,7 @@ import ContentCover from "@/components/content/ContentCover";
 import ContentBody from "@/components/content/ContentBody";
 import ContentGallery from "@/components/content/ContentGallery";
 import ContentFAQ from "@/components/content/ContentFAQ";
+import RelatedContent from "@/components/content/RelatedContent";
 import ContentCTA from "@/components/content/ContentCTA";
 
 import { createBreadcrumb } from "@/lib/breadcrumb";
@@ -39,6 +40,8 @@ export default async function ArticleDetailPage({ params }: PageProps) {
       {data.gallery && data.gallery.length > 0 && <ContentGallery images={data.gallery} />}
 
       {data.faq && data.faq.length > 0 && <ContentFAQ items={data.faq} />}
+
+      {data.related && data.related.length > 0 && <RelatedContent articles={data.related} />}
 
       <ContentCTA whatsappUrl="https://wa.me/6281234354300" />
     </>

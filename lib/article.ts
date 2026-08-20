@@ -67,10 +67,8 @@ type ArticleGalleryRow = {
 type ArticleRelatedRow = {
   id: number;
   article_id: number;
+  related_article_id: number;
   related_order: number;
-  title: string;
-  slug: string;
-  cover: string;
 };
 
 type ArticleRow = {
@@ -163,7 +161,20 @@ export async function getArticleContent(slug: string): Promise<ContentData | und
   const faq = (faqResult.data ?? []) as ArticleFaqRow[];
   const gallery = (galleryResult.data ?? []) as ArticleGalleryRow[];
   const related = (relatedResult.data ?? []) as ArticleRelatedRow[];
+  let relatedArticles: ArticleRow[] = [];
 
+  const relatedArticleIds = related.map((item) => item.related_article_id);
+
+  if (relatedArticleIds.length > 0) {
+    const { data, error } = await supabase.from("articles").select("*").in("id", relatedArticleIds);
+
+    if (error) {
+      console.error("Related articles detail error:", error);
+      return undefined;
+    }
+
+    relatedArticles = (data ?? []) as ArticleRow[];
+  }
   const sectionIds = sections.map((section) => section.id);
 
   let tables: ArticleSectionTableRow[] = [];
@@ -233,11 +244,27 @@ export async function getArticleContent(slug: string): Promise<ContentData | und
 
     related:
       related.length > 0
-        ? related.map((item) => ({
-            title: item.title,
-            slug: item.slug,
-            cover: item.cover,
-          }))
+        ? related
+            .map((relation) => {
+              const article = relatedArticles.find((item) => item.id === relation.related_article_id);
+
+              if (!article) return null;
+
+              return {
+                title: article.title,
+                slug: article.slug,
+                cover: article.cover_src,
+              };
+            })
+            .filter(
+              (
+                item,
+              ): item is {
+                title: string;
+                slug: string;
+                cover: string;
+              } => item !== null,
+            )
         : undefined,
   };
 }
