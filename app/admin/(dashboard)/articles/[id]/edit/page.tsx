@@ -31,6 +31,30 @@ function formatDateTimeLocal(date: string) {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
+/*
+ * Mengubah public URL Supabase Storage menjadi
+ * path file di dalam bucket article-images.
+ *
+ * Contoh:
+ * https://xxxx.supabase.co/storage/v1/object/public/article-images/covers/abc.png
+ *
+ * menjadi:
+ * covers/abc.png
+ */
+function getStoragePath(publicUrl: string | null | undefined) {
+  if (!publicUrl) return null;
+
+  const marker = "/storage/v1/object/public/article-images/";
+
+  const index = publicUrl.indexOf(marker);
+
+  if (index === -1) {
+    return null;
+  }
+
+  return decodeURIComponent(publicUrl.slice(index + marker.length));
+}
+
 /* =====================================================
    TYPES
 ===================================================== */
@@ -135,6 +159,7 @@ type RelatedArticleData = {
   cover_src: string;
 };
 
+type SaveMode = "draft" | "published";
 /* =====================================================
    DEFAULT
 ===================================================== */
@@ -189,6 +214,7 @@ export default function EditArticlePage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saveMode, setSaveMode] = useState<SaveMode | null>(null);
   const [error, setError] = useState("");
 
   const [sections, setSections] = useState<Section[]>([emptySection()]);
@@ -839,14 +865,45 @@ export default function EditArticlePage() {
   }
 
   /* =====================================================
+     STORAGE DELETE
+  ===================================================== */
+
+  async function deleteStorageFiles(paths: string[]) {
+    const uniquePaths = [...new Set(paths.filter(Boolean))];
+
+    if (uniquePaths.length === 0) {
+      return;
+    }
+
+    console.log("Storage paths yang akan dihapus:", uniquePaths);
+
+    const { data, error } = await supabase.storage.from("article-images").remove(uniquePaths);
+
+    console.log("Storage delete result:", data);
+    console.log("Storage delete error:", error);
+
+    if (error) {
+      throw new Error(`Gagal menghapus gambar dari Storage: ${error.message}`);
+    }
+  }
+
+  /* =====================================================
      SUBMIT UPDATE
   ===================================================== */
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-
+  async function handleSubmit(mode: SaveMode) {
     setError("");
     setSaving(true);
+    setSaveMode(mode);
+
+    /*
+     * Menyimpan file baru yang berhasil diupload.
+     *
+     * Kalau nanti proses database gagal,
+     * file baru tersebut juga akan dibersihkan
+     * supaya tidak menjadi orphan file.
+     */
+    const newlyUploadedPaths: string[] = [];
 
     try {
       /* =================================================
@@ -876,19 +933,60 @@ export default function EditArticlePage() {
       }
 
       /* =================================================
+         LOAD OLD STORAGE FILES
+      ================================================= */
+
+      /*
+       * Ambil cover lama.
+       */
+      const oldCoverUrl = form.cover_src;
+
+      /*
+       * Ambil semua gallery lama SEBELUM
+       * row article_gallery dihapus.
+       */
+      const { data: oldGalleryRows, error: oldGalleryFetchError } = await supabase.from("article_gallery").select("id, src").eq("article_id", id);
+
+      if (oldGalleryFetchError) {
+        throw new Error(`Gagal mengambil gallery lama: ${oldGalleryFetchError.message}`);
+      }
+
+      const oldGalleryUrls = ((oldGalleryRows as GalleryRow[] | null) ?? []).map((item) => item.src);
+
+      /* =================================================
          COVER
       ================================================= */
 
       let coverUrl = form.cover_src;
 
       if (coverFile) {
+        /*
+         * Upload cover baru terlebih dahulu.
+         */
         coverUrl = await uploadImage(coverFile, "covers");
+
+        /*
+         * Simpan path cover baru untuk fallback cleanup.
+         */
+        const newCoverPath = getStoragePath(coverUrl);
+
+        if (newCoverPath) {
+          newlyUploadedPaths.push(newCoverPath);
+        }
       }
 
       /* =================================================
          UPDATE ARTICLE
       ================================================= */
+      let publishedAt: string | null = form.published_at || null;
 
+      if (mode === "published") {
+        publishedAt = form.published_at ? new Date(form.published_at).toISOString() : new Date().toISOString();
+      }
+
+      if (mode === "draft") {
+        publishedAt = null;
+      }
       const { error: articleError } = await supabase
         .from("articles")
         .update({
@@ -897,7 +995,7 @@ export default function EditArticlePage() {
           slug: form.slug.trim(),
           excerpt: form.excerpt.trim(),
           category: form.category.trim() || "Umum",
-          published_at: form.published_at || null,
+          published_at: publishedAt,
           updated_at: new Date().toISOString(),
           reading_time: form.reading_time.trim() || null,
           cover_src: coverUrl,
@@ -910,10 +1008,30 @@ export default function EditArticlePage() {
       }
 
       /* =================================================
+         DELETE OLD COVER FROM STORAGE
+      ================================================= */
+
+      /*
+       * Hanya hapus cover lama jika memang
+       * diganti dengan cover baru.
+       */
+      if (coverFile && oldCoverUrl && oldCoverUrl !== coverUrl) {
+        const oldCoverPath = getStoragePath(oldCoverUrl);
+
+        if (oldCoverPath) {
+          await deleteStorageFiles([oldCoverPath]);
+        }
+      }
+
+      /* =================================================
          DELETE OLD SECTION TABLES
       ================================================= */
 
-      const { data: oldSections } = await supabase.from("article_sections").select("id").eq("article_id", id);
+      const { data: oldSections, error: oldSectionsFetchError } = await supabase.from("article_sections").select("id").eq("article_id", id);
+
+      if (oldSectionsFetchError) {
+        throw new Error(oldSectionsFetchError.message);
+      }
 
       if (oldSections && oldSections.length > 0) {
         const sectionIds = oldSections.map((section) => section.id);
@@ -1004,7 +1122,60 @@ export default function EditArticlePage() {
       }
 
       /* =================================================
-         DELETE OLD GALLERY
+         GALLERY
+      ================================================= */
+
+      /*
+       * Kita TIDAK langsung menghapus file lama.
+       *
+       * Karena gallery lama yang masih dipertahankan
+       * masih menggunakan file Storage tersebut.
+       */
+
+      const galleryPayload: {
+        article_id: number;
+        image_order: number;
+        src: string;
+        alt: string;
+      }[] = [];
+
+      const finalGalleryUrls: string[] = [];
+
+      for (let index = 0; index < gallery.length; index++) {
+        const item = gallery[index];
+
+        let imageUrl = item.src || "";
+
+        /*
+         * Jika user mengganti file gallery,
+         * upload file baru.
+         */
+        if (item.file) {
+          imageUrl = await uploadImage(item.file, "gallery");
+
+          const newGalleryPath = getStoragePath(imageUrl);
+
+          if (newGalleryPath) {
+            newlyUploadedPaths.push(newGalleryPath);
+          }
+        }
+
+        if (!imageUrl) {
+          continue;
+        }
+
+        finalGalleryUrls.push(imageUrl);
+
+        galleryPayload.push({
+          article_id: id,
+          image_order: index + 1,
+          src: imageUrl,
+          alt: item.alt.trim() || form.title.trim(),
+        });
+      }
+
+      /* =================================================
+         DELETE OLD GALLERY DATABASE
       ================================================= */
 
       const { error: galleryDeleteError } = await supabase.from("article_gallery").delete().eq("article_id", id);
@@ -1014,45 +1185,37 @@ export default function EditArticlePage() {
       }
 
       /* =================================================
-         INSERT GALLERY
+         INSERT NEW GALLERY DATABASE
       ================================================= */
 
-      if (gallery.length > 0) {
-        const galleryPayload: {
-          article_id: number;
-          image_order: number;
-          src: string;
-          alt: string;
-        }[] = [];
+      if (galleryPayload.length > 0) {
+        const { error: galleryError } = await supabase.from("article_gallery").insert(galleryPayload);
 
-        for (let index = 0; index < gallery.length; index++) {
-          const item = gallery[index];
-
-          let imageUrl = item.src || "";
-
-          if (item.file) {
-            imageUrl = await uploadImage(item.file, "gallery");
-          }
-
-          if (!imageUrl) {
-            continue;
-          }
-
-          galleryPayload.push({
-            article_id: id,
-            image_order: index + 1,
-            src: imageUrl,
-            alt: item.alt.trim() || form.title.trim(),
-          });
+        if (galleryError) {
+          throw new Error(galleryError.message);
         }
+      }
 
-        if (galleryPayload.length > 0) {
-          const { error: galleryError } = await supabase.from("article_gallery").insert(galleryPayload);
+      /* =================================================
+         DELETE UNUSED OLD GALLERY FILES
+      ================================================= */
 
-          if (galleryError) {
-            throw new Error(galleryError.message);
-          }
-        }
+      /*
+       * Ambil path gallery yang masih dipakai.
+       */
+      const finalGalleryPaths = finalGalleryUrls.map((url) => getStoragePath(url)).filter((path): path is string => Boolean(path));
+
+      /*
+       * Hanya hapus file lama yang TIDAK ADA
+       * di gallery baru.
+       */
+      const galleryPathsToDelete = oldGalleryUrls
+        .map((url) => getStoragePath(url))
+        .filter((path): path is string => Boolean(path))
+        .filter((oldPath) => !finalGalleryPaths.includes(oldPath));
+
+      if (galleryPathsToDelete.length > 0) {
+        await deleteStorageFiles(galleryPathsToDelete);
       }
 
       /* =================================================
@@ -1121,14 +1284,26 @@ export default function EditArticlePage() {
       ================================================= */
 
       router.push("/admin/articles");
-
       router.refresh();
     } catch (err) {
       console.error(err);
 
-      setError(err instanceof Error ? err.message : "Gagal menyimpan perubahan.");
+      /*
+       * Jika upload berhasil tetapi proses database gagal,
+       * hapus file baru supaya tidak menjadi orphan.
+       */
+      if (newlyUploadedPaths.length > 0) {
+        try {
+          await deleteStorageFiles(newlyUploadedPaths);
+        } catch (cleanupError) {
+          console.error("Gagal cleanup file baru:", cleanupError);
+        }
+      }
+
+      setError(err instanceof Error ? err.message : "Terjadi kesalahan saat menyimpan artikel.");
     } finally {
       setSaving(false);
+      setSaveMode(null);
     }
   }
 
@@ -1165,7 +1340,7 @@ export default function EditArticlePage() {
           <p className="mt-3 text-slate-500">Ubah artikel beserta section, gallery, FAQ, dan artikel terkait.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form className="space-y-8">
           {error && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
 
           {/* =================================================
@@ -1261,7 +1436,6 @@ export default function EditArticlePage() {
                     if (!file) return;
 
                     setCoverFile(file);
-
                     setCoverPreview(URL.createObjectURL(file));
                   }}
                   className="block w-full rounded-lg border border-slate-300 px-4 py-3 text-sm"
@@ -1589,13 +1763,27 @@ export default function EditArticlePage() {
               SUBMIT
           ================================================= */}
 
-          <div className="flex justify-end gap-3 border-t border-slate-200 pt-6">
-            <Link href="/admin/articles" className="rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700">
+          <div className="flex flex-col justify-end gap-3 border-t border-slate-200 pt-6 sm:flex-row">
+            <Link href="/admin/articles" className="rounded-lg border border-slate-300 bg-white px-5 py-3 text-center text-sm font-semibold text-slate-700">
               Batal
             </Link>
 
-            <button type="submit" disabled={saving} className="rounded-lg bg-[#0F4C81] px-6 py-3 text-sm font-semibold text-white disabled:opacity-60">
-              {saving ? "Menyimpan..." : "Simpan Perubahan"}
+            <button
+              type="button"
+              onClick={() => handleSubmit("draft")}
+              disabled={saving}
+              className="rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {saving && saveMode === "draft" ? "Menyimpan..." : "Simpan Draft"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleSubmit("published")}
+              disabled={saving}
+              className="rounded-lg bg-[#0F4C81] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0c3d68] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {saving && saveMode === "published" ? "Menerbitkan..." : "Publish Artikel"}
             </button>
           </div>
         </form>

@@ -94,7 +94,7 @@ type ArticleRow = {
 export async function getAllArticles(): Promise<Array<ContentData & { slug: string }>> {
   const supabase = await createClient();
 
-  const { data, error } = await supabase.from("articles").select("*").order("published_at", { ascending: false });
+  const { data, error } = await supabase.from("articles").select("*").not("published_at", "is", null).order("published_at", { ascending: false });
 
   if (error) {
     console.error("Gagal mengambil semua artikel:", error);
@@ -133,7 +133,7 @@ export async function getAllArticles(): Promise<Array<ContentData & { slug: stri
 export async function getArticleContent(slug: string): Promise<ContentData | undefined> {
   const supabase = await createClient();
 
-  const { data: article, error: articleError } = await supabase.from("articles").select("*").eq("slug", slug).maybeSingle();
+  const { data: article, error: articleError } = await supabase.from("articles").select("*").eq("slug", slug).not("published_at", "is", null).maybeSingle();
 
   if (articleError || !article) {
     console.error("Article error:", articleError);
@@ -282,19 +282,20 @@ export async function getFeaturedProjects(limit = 3) {
     .from("articles")
     .select(
       `
-        slug,
-        badge,
-        title,
-        excerpt,
-        category,
-        published_at,
-        updated_at,
-        reading_time,
-        cover_src,
-        cover_alt
-      `,
+      slug,
+      badge,
+      title,
+      excerpt,
+      category,
+      published_at,
+      updated_at,
+      reading_time,
+      cover_src,
+      cover_alt
+    `,
     )
     .eq("badge", "Proyek")
+    .not("published_at", "is", null)
     .order("published_at", { ascending: false })
     .limit(limit);
 

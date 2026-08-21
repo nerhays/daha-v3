@@ -41,7 +41,7 @@ export default async function AdminArticlesPage({ searchParams }: AdminArticlesP
       `,
       { count: "exact" },
     )
-    .order("published_at", {
+    .order("updated_at", {
       ascending: false,
       nullsFirst: false,
     })
