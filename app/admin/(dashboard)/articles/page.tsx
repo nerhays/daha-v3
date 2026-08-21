@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-
+import ArticleActions from "./ArticleActions";
 export default async function AdminArticlesPage() {
   const supabase = await createClient();
 
@@ -96,15 +96,7 @@ export default async function AdminArticlesPage() {
 
                       {/* ACTION */}
                       <td className="px-6 py-5">
-                        <div className="flex justify-end gap-2">
-                          <Link href={`/artikel/${article.slug}`} target="_blank" className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">
-                            Lihat
-                          </Link>
-
-                          <Link href={`/admin/articles/${article.id}/edit`} className="rounded-lg bg-[#0F4C81] px-3 py-2 text-sm font-medium text-white hover:bg-[#0c3d68]">
-                            Edit
-                          </Link>
-                        </div>
+                        <ArticleActions articleId={article.id} slug={article.slug} />
                       </td>
                     </tr>
                   ))

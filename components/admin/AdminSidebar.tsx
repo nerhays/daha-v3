@@ -12,7 +12,7 @@ const menus = [
   },
   {
     label: "Layanan",
-    href: "/admin/layanan",
+    href: "/admin/under-construction",
     icon: Wrench,
   },
   {
