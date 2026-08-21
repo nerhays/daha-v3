@@ -88,7 +88,11 @@ export default async function AdminArticlesPage() {
 
                       {/* STATUS */}
                       <td className="px-6 py-5">
-                        <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-700">Published</span>
+                        {article.published_at ? (
+                          <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-700">Published</span>
+                        ) : (
+                          <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">Draft</span>
+                        )}
                       </td>
 
                       {/* DATE */}

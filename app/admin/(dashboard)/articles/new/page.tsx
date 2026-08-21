@@ -43,6 +43,8 @@ type RelatedArticle = {
   cover_src: string;
 };
 
+type SaveMode = "draft" | "published";
+
 const emptySection = (): Section => ({
   heading: "",
   paragraphs: [""],
@@ -63,6 +65,10 @@ export default function NewArticlePage() {
   const router = useRouter();
   const supabase = createClient();
 
+  /* =====================================================
+     FORM
+  ===================================================== */
+
   const [form, setForm] = useState({
     badge: "Artikel",
     title: "",
@@ -75,10 +81,18 @@ export default function NewArticlePage() {
     cover_alt: "",
   });
 
+  /* =====================================================
+     ARTICLE CONTENT
+  ===================================================== */
+
   const [sections, setSections] = useState<Section[]>([emptySection()]);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [related, setRelated] = useState<RelatedArticle[]>([]);
+
+  /* =====================================================
+     AVAILABLE ARTICLES
+  ===================================================== */
 
   const [availableArticles, setAvailableArticles] = useState<
     {
@@ -88,18 +102,25 @@ export default function NewArticlePage() {
     }[]
   >([]);
 
-  useEffect(() => {
-    loadArticles();
-  }, []);
+  /* =====================================================
+     STATE
+  ===================================================== */
 
   const [saving, setSaving] = useState(false);
+  const [saveMode, setSaveMode] = useState<SaveMode | null>(null);
+
   const [error, setError] = useState("");
+
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState("");
 
   /* =====================================================
      LOAD AVAILABLE ARTICLES
   ===================================================== */
+
+  useEffect(() => {
+    loadArticles();
+  }, []);
 
   async function loadArticles() {
     const { data, error } = await supabase.from("articles").select("id, title, cover_src").order("published_at", { ascending: false });
@@ -133,6 +154,7 @@ export default function NewArticlePage() {
   /* =====================================================
      SECTION
   ===================================================== */
+
   function updateSection<K extends keyof Section>(sectionIndex: number, field: K, value: Section[K]) {
     setSections((prev) =>
       prev.map((section, index) =>
@@ -440,6 +462,11 @@ export default function NewArticlePage() {
   function removeRelated(index: number) {
     setRelated((prev) => prev.filter((_, i) => i !== index));
   }
+
+  /* =====================================================
+     UPLOAD IMAGE
+  ===================================================== */
+
   async function uploadImage(file: File, folder: "covers" | "gallery") {
     const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
 
@@ -462,18 +489,53 @@ export default function NewArticlePage() {
 
     return publicUrl;
   }
+  /* =====================================================
+   PREVIEW
+===================================================== */
 
+  function handlePreview() {
+    if (!form.title.trim()) {
+      setError("Judul artikel wajib diisi sebelum preview.");
+      return;
+    }
+
+    if (!form.excerpt.trim()) {
+      setError("Excerpt wajib diisi sebelum preview.");
+      return;
+    }
+
+    const previewData = {
+      form: {
+        ...form,
+        cover_src: coverPreview || form.cover_src,
+      },
+      sections,
+      gallery: gallery.map((item) => ({
+        preview: item.preview,
+        alt: item.alt,
+      })),
+      faqs,
+      related,
+    };
+
+    sessionStorage.setItem("article-preview", JSON.stringify(previewData));
+
+    window.open("/admin/articles/preview", "_blank");
+  }
   /* =====================================================
      SUBMIT
   ===================================================== */
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-
+  async function handleSubmit(mode: SaveMode) {
     setError("");
     setSaving(true);
+    setSaveMode(mode);
 
     try {
+      /* =================================================
+         VALIDATION
+      ================================================= */
+
       if (!form.title.trim()) {
         throw new Error("Judul artikel wajib diisi.");
       }
@@ -485,9 +547,14 @@ export default function NewArticlePage() {
       if (!form.excerpt.trim()) {
         throw new Error("Excerpt wajib diisi.");
       }
+
       if (!coverFile) {
         throw new Error("Cover artikel wajib diupload.");
       }
+
+      /* =================================================
+         CHECK SLUG
+      ================================================= */
 
       const { data: existingArticle } = await supabase.from("articles").select("id").eq("slug", form.slug).maybeSingle();
 
@@ -496,9 +563,25 @@ export default function NewArticlePage() {
       }
 
       /* =================================================
+         DETERMINE PUBLISHED DATE
+      ================================================= */
+
+      let publishedAt: string | null = null;
+
+      if (mode === "published") {
+        if (form.published_at) {
+          publishedAt = new Date(form.published_at).toISOString();
+        } else {
+          publishedAt = new Date().toISOString();
+        }
+      }
+
+      /* =================================================
          ARTICLE
       ================================================= */
+
       const coverUrl = await uploadImage(coverFile, "covers");
+
       const { data: article, error: articleError } = await supabase
         .from("articles")
         .insert({
@@ -507,10 +590,23 @@ export default function NewArticlePage() {
           slug: form.slug.trim(),
           excerpt: form.excerpt.trim(),
           category: form.category.trim() || "Umum",
-          published_at: form.published_at || null,
+
+          /*
+           * DRAFT:
+           * published_at = null
+           *
+           * PUBLISHED:
+           * published_at = tanggal yang dipilih
+           * atau waktu sekarang
+           */
+          published_at: publishedAt,
+
           updated_at: new Date().toISOString(),
+
           reading_time: form.reading_time.trim() || null,
+
           cover_src: coverUrl,
+
           cover_alt: form.cover_alt.trim() || form.title.trim(),
         })
         .select("id")
@@ -523,8 +619,8 @@ export default function NewArticlePage() {
       const articleId = article.id;
 
       /* =================================================
-   SECTIONS
-================================================= */
+         SECTIONS
+      ================================================= */
 
       const validSections = sections.filter((section) => section.heading.trim() || section.paragraphs.some((p) => p.trim()) || section.list.some((item) => item.trim()) || section.table.enabled);
 
@@ -547,11 +643,9 @@ export default function NewArticlePage() {
           throw new Error("Section berhasil dibuat tetapi ID tidak dikembalikan.");
         }
 
-        console.log("Sections berhasil:", insertedSections);
-
         /* =================================================
-     SECTION TABLES
-  ================================================= */
+           SECTION TABLES
+        ================================================= */
 
         const tablePayload: {
           section_id: number;
@@ -585,19 +679,22 @@ export default function NewArticlePage() {
           if (tableError) {
             throw new Error(`Gagal menyimpan table: ${tableError.message}`);
           }
-
-          console.log("Tables berhasil");
         }
       }
 
       /* =================================================
-   GALLERY
-================================================= */
+         GALLERY
+      ================================================= */
 
       const validGallery = gallery.filter((item) => item.file !== null);
 
       if (validGallery.length > 0) {
-        const galleryPayload = [];
+        const galleryPayload: {
+          article_id: number;
+          image_order: number;
+          src: string;
+          alt: string;
+        }[] = [];
 
         for (let index = 0; index < validGallery.length; index++) {
           const item = validGallery[index];
@@ -620,14 +717,12 @@ export default function NewArticlePage() {
           if (galleryError) {
             throw new Error(`Gagal menyimpan gallery: ${galleryError.message}`);
           }
-
-          console.log("Gallery berhasil");
         }
       }
 
       /* =================================================
-   FAQ
-================================================= */
+         FAQ
+      ================================================= */
 
       const validFAQs = faqs.filter((faq) => faq.question.trim() && faq.answer.trim());
 
@@ -644,17 +739,11 @@ export default function NewArticlePage() {
         if (faqError) {
           throw new Error(`Gagal menyimpan FAQ: ${faqError.message}`);
         }
-
-        console.log("FAQ berhasil");
       }
 
       /* =================================================
-         RELATED
+         RELATED ARTICLES
       ================================================= */
-
-      /* =================================================
-   RELATED
-================================================= */
 
       const validRelated = related.filter((item) => item.article_id > 0);
 
@@ -672,12 +761,17 @@ export default function NewArticlePage() {
         }
       }
 
+      /* =================================================
+         SUCCESS
+      ================================================= */
+
       router.push("/admin/articles");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Terjadi kesalahan saat menyimpan artikel.");
     } finally {
       setSaving(false);
+      setSaveMode(null);
     }
   }
 
@@ -688,7 +782,10 @@ export default function NewArticlePage() {
   return (
     <div className="min-h-screen bg-slate-50 px-8 py-10">
       <div className="mx-auto max-w-5xl">
-        {/* HEADER */}
+        {/* =================================================
+            HEADER
+        ================================================= */}
+
         <div className="mb-8">
           <Link href="/admin/articles" className="text-sm font-medium text-[#0F4C81] hover:underline">
             ← Kembali ke Artikel
@@ -701,7 +798,11 @@ export default function NewArticlePage() {
           <p className="mt-3 text-slate-500">Tambahkan artikel lengkap beserta section, gallery, FAQ, dan artikel terkait.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form className="space-y-8">
+          {/* =================================================
+              ERROR
+          ================================================= */}
+
           {error && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
 
           {/* =================================================
@@ -712,14 +813,19 @@ export default function NewArticlePage() {
             <h2 className="text-xl font-bold text-slate-900">Informasi Utama</h2>
 
             <div className="mt-6 grid gap-6 md:grid-cols-2">
+              {/* BADGE */}
+
               <div>
                 <label className="mb-2 block text-sm font-semibold text-slate-700">Badge</label>
 
                 <select name="badge" value={form.badge} onChange={handleChange} className="w-full rounded-lg border border-slate-300 px-4 py-3">
                   <option value="Artikel">Artikel</option>
+
                   <option value="Proyek">Proyek</option>
                 </select>
               </div>
+
+              {/* CATEGORY */}
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-slate-700">Kategori</label>
@@ -727,31 +833,46 @@ export default function NewArticlePage() {
                 <input name="category" value={form.category} onChange={handleChange} placeholder="Contoh: Konstruksi" className="w-full rounded-lg border border-slate-300 px-4 py-3" />
               </div>
 
+              {/* TITLE */}
+
               <div className="md:col-span-2">
                 <label className="mb-2 block text-sm font-semibold text-slate-700">Judul *</label>
 
                 <input value={form.title} onChange={(e) => handleTitleChange(e.target.value)} placeholder="Masukkan judul artikel" className="w-full rounded-lg border border-slate-300 px-4 py-3" />
               </div>
 
+              {/* SLUG */}
+
               <div className="md:col-span-2">
                 <label className="mb-2 block text-sm font-semibold text-slate-700">Slug *</label>
 
                 <input name="slug" value={form.slug} onChange={handleChange} className="w-full rounded-lg border border-slate-300 px-4 py-3" />
 
-                <p className="mt-2 text-xs text-slate-400">URL: /artikel/{form.slug || "judul-artikel"}</p>
+                <p className="mt-2 text-xs text-slate-400">
+                  URL: /artikel/
+                  {form.slug || "judul-artikel"}
+                </p>
               </div>
+
+              {/* EXCERPT */}
 
               <div className="md:col-span-2">
                 <label className="mb-2 block text-sm font-semibold text-slate-700">Excerpt *</label>
 
-                <textarea name="excerpt" value={form.excerpt} onChange={handleChange} rows={4} className="w-full rounded-lg border border-slate-300 px-4 py-3" />
+                <textarea name="excerpt" value={form.excerpt} onChange={handleChange} rows={4} placeholder="Ringkasan singkat artikel..." className="w-full rounded-lg border border-slate-300 px-4 py-3" />
               </div>
+
+              {/* PUBLISHED DATE */}
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-slate-700">Tanggal Publikasi</label>
 
                 <input type="datetime-local" name="published_at" value={form.published_at} onChange={handleChange} className="w-full rounded-lg border border-slate-300 px-4 py-3" />
+
+                <p className="mt-2 text-xs text-slate-400">Untuk Draft, tanggal ini tidak digunakan. Untuk Publish, jika kosong maka menggunakan waktu sekarang.</p>
               </div>
+
+              {/* READING TIME */}
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-slate-700">Waktu Baca</label>
@@ -759,36 +880,37 @@ export default function NewArticlePage() {
                 <input name="reading_time" value={form.reading_time} onChange={handleChange} placeholder="5 menit" className="w-full rounded-lg border border-slate-300 px-4 py-3" />
               </div>
 
+              {/* COVER */}
+
               <div className="md:col-span-2">
-                <label className="mb-2 block text-sm font-semibold text-slate-700"> Cover</label>
-                <div className="md:col-span-2">
-                  <label className="mb-2 block text-sm font-semibold text-slate-700">Cover *</label>
+                <label className="mb-2 block text-sm font-semibold text-slate-700">Cover *</label>
 
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
 
-                      if (!file) return;
+                    if (!file) return;
 
-                      setCoverFile(file);
-                      setCoverPreview(URL.createObjectURL(file));
-                    }}
-                    className="block w-full rounded-lg border border-slate-300 px-4 py-3 text-sm"
-                  />
+                    setCoverFile(file);
+                    setCoverPreview(URL.createObjectURL(file));
+                  }}
+                  className="block w-full rounded-lg border border-slate-300 px-4 py-3 text-sm"
+                />
 
-                  {coverPreview && (
-                    <div className="mt-4 overflow-hidden rounded-xl border border-slate-200">
-                      <img src={coverPreview} alt="Preview cover" className="h-64 w-full object-cover" />
-                    </div>
-                  )}
+                {coverPreview && (
+                  <div className="mt-4 overflow-hidden rounded-xl border border-slate-200">
+                    <img src={coverPreview} alt="Preview cover" className="h-64 w-full object-cover" />
+                  </div>
+                )}
 
-                  {coverFile && <p className="mt-2 text-xs text-slate-500">File: {coverFile.name}</p>}
+                {coverFile && <p className="mt-2 text-xs text-slate-500">File: {coverFile.name}</p>}
 
-                  <p className="mt-2 text-xs text-slate-400">Pilih gambar dari komputer. Gambar akan otomatis disimpan ke Supabase Storage saat artikel disimpan.</p>
-                </div>{" "}
+                <p className="mt-2 text-xs text-slate-400">Pilih gambar dari komputer. Gambar akan otomatis disimpan ke Supabase Storage saat artikel disimpan.</p>
               </div>
+
+              {/* ALT COVER */}
 
               <div className="md:col-span-2">
                 <label className="mb-2 block text-sm font-semibold text-slate-700">Alt Cover</label>
@@ -827,6 +949,8 @@ export default function NewArticlePage() {
                       </button>
                     )}
                   </div>
+
+                  {/* HEADING */}
 
                   <input value={section.heading} onChange={(e) => updateSection(sectionIndex, "heading", e.target.value)} placeholder="Heading section" className="w-full rounded-lg border border-slate-300 px-4 py-3" />
 
@@ -1056,8 +1180,8 @@ export default function NewArticlePage() {
           </div>
 
           {/* =================================================
-    RELATED ARTICLES
-================================================= */}
+              RELATED ARTICLES
+          ================================================= */}
 
           <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
             <div className="flex items-center justify-between">
@@ -1109,13 +1233,33 @@ export default function NewArticlePage() {
               SUBMIT
           ================================================= */}
 
-          <div className="flex justify-end gap-3 border-t border-slate-200 pt-6">
-            <Link href="/admin/articles" className="rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700">
+          <div className="flex flex-col justify-end gap-3 border-t border-slate-200 pt-6 sm:flex-row">
+            <Link href="/admin/articles" className="rounded-lg border border-slate-300 bg-white px-5 py-3 text-center text-sm font-semibold text-slate-700">
               Batal
             </Link>
 
-            <button type="submit" disabled={saving} className="rounded-lg bg-[#0F4C81] px-6 py-3 text-sm font-semibold text-white disabled:opacity-60">
-              {saving ? "Menyimpan..." : "Simpan Artikel"}
+            {/* DRAFT */}
+            <button type="button" onClick={handlePreview} disabled={saving} className="rounded-lg border border-[#0F4C81] bg-white px-5 py-3 text-sm font-semibold text-[#0F4C81] transition hover:bg-blue-50 disabled:opacity-60">
+              Preview
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSubmit("draft")}
+              disabled={saving}
+              className="rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {saving && saveMode === "draft" ? "Menyimpan..." : "Simpan Draft"}
+            </button>
+
+            {/* PUBLISH */}
+
+            <button
+              type="button"
+              onClick={() => handleSubmit("published")}
+              disabled={saving}
+              className="rounded-lg bg-[#0F4C81] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0c3d68] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {saving && saveMode === "published" ? "Menerbitkan..." : "Publish Artikel"}
             </button>
           </div>
         </form>
